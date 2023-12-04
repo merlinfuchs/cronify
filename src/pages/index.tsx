@@ -3,10 +3,12 @@ import cronstrue from "cronstrue";
 import { useEffect, useMemo, useState } from "react";
 import parser from "cron-parser";
 import clsx from "clsx";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
   const [cron, setCron] = useState("0 0 * * *");
 
   const [explanation, valid] = useMemo(() => {
@@ -32,6 +34,7 @@ export default function Home() {
   }, [cron]);
 
   function generate(prompt: string) {
+    setLoading(true);
     fetch("/api/generate", {
       method: "POST",
       headers: {
@@ -42,11 +45,22 @@ export default function Home() {
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setCron(res.result);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }
 
   return (
     <main className={`${inter.className} max-w-4xl mx-auto my-48`}>
+      <Head>
+        <title>Cronify - Generate and explain cron schedule expressions</title>
+        <meta
+          name="description"
+          content="Generate and explain cron schedule expressions"
+        />
+      </Head>
       <div>
         <div className="mb-20">
           <div
@@ -68,7 +82,8 @@ export default function Home() {
           type="text"
           className={clsx(
             "w-full bg-gray-800 px-3 py-2 rounded-md text-4xl text-center text-white focus:outline-none tracking-[0.5em] mb-5",
-            !valid && "ring-2 ring-red-500"
+            !valid && "ring-2 ring-red-500",
+            loading && "animate-pulse"
           )}
           value={cron}
           onChange={(e) => setCron(e.target.value)}
