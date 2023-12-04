@@ -29,7 +29,7 @@ export default async function handler(
   const data = generateRequestSchema.parse(req.body);
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4-1106-preview",
     temperature: 0.1,
     messages: [
       {
